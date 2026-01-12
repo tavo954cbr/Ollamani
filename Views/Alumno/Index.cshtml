@@ -1,0 +1,37 @@
+﻿
+@{
+    Layout = null;
+    @model System.Data.DataTable
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div> 
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Grado</th>
+                    <th>Edad</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (System.Data.DataRow row in Model.Rows)
+            {
+                <tr>
+                    <td>@row["Nombre"]</td>
+                    <td>@row["Grado"]</td>
+                    <td>@row["Edad"]</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
