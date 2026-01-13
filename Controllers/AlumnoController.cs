@@ -1,91 +1,73 @@
 ﻿using Ollamani.Data;
+using Ollamani.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
+using System.Web.Management;
 using System.Web.Mvc;
 
 namespace Ollamani.Controllers
 {
     public class AlumnoController : Controller
     {
-        // GET: Alumno
+        private AlumnoRepository _repo = new AlumnoRepository();
+
         public ActionResult Index()
         {
-            var repo = new AlumnoRepository();
-            var dt = repo.ObtenerAlumnos();
-            return View(dt);
-        }
-
-        // GET: Alumno/Details/5
-        public ActionResult Details(int id)
-        {
             return View();
+            //var repo = new AlumnoRepository();
+            //var dt = repo.ObtenerAlumnos();
+            //return View(dt);
         }
 
-        // GET: Alumno/Create
-        public ActionResult Create()
+        [HttpGet]
+        public JsonResult GetAlumnos()
         {
-            return View();
+            var dt = _repo.ObtenerAlumnos();
+
+            var alumnos = dt.AsEnumerable().Select(r => new
+            {
+                IdAlumno = r.Field<int>("IdAlumno"),
+                Nombre = r.Field<string>("Nombre"),
+                Grado = r.Field<string>("Grado"),
+                Edad = r.Field<int>("Edad")
+            }).ToList();
+
+            return Json(alumnos, JsonRequestBehavior.AllowGet);
         }
 
-        // POST: Alumno/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult InsertAlumnos(AlumnoModel model)
+        {
+            _repo.GuardarAlumno(model);
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public JsonResult UpdateAlumnos(AlumnoModel model)
+        {
+            _repo.ActualizarAlumno(model);
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public JsonResult DeleteAlumnos(int id)
         {
             try
             {
-                // TODO: Add insert logic here
-
-                return RedirectToAction("Index");
+                _repo.EliminarAlumno(id);
+                return Json(new { success = true }, JsonRequestBehavior.AllowGet);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
-            }
-        }
+                // Esto te mostrará el error en la ventana de Output de Visual Studio
+                System.Diagnostics.Debug.WriteLine("ERROR AL ELIMINAR:");
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
 
-        // GET: Alumno/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Alumno/Edit/5
-        [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Alumno/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Alumno/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
     }

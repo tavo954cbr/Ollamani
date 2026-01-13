@@ -9,29 +9,30 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Index</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <title>Ollimani</title>
 </head>
 <body>
+    <h2>Ollimani Alumnos</h2>
     <div> 
-        <table>
+        <button id="btnNuevo" class="btn btn-primary">
+            Nuevo Alumno
+        </button>
+        <table id="tblAlumnos" class="table table-bordered">
             <thead>
                 <tr>
                     <th>Nombre</th>
                     <th>Grado</th>
                     <th>Edad</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-            @foreach (System.Data.DataRow row in Model.Rows)
-            {
-                <tr>
-                    <td>@row["Nombre"]</td>
-                    <td>@row["Grado"]</td>
-                    <td>@row["Edad"]</td>
-                </tr>
-            }
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/Scripts/alumno.js"></script>
 </body>
 </html>
