@@ -13,5 +13,4 @@ packages/
 node_modules/
 
 ## Configuración sensible
-Web.config
 appsettings.json
