@@ -19,22 +19,6 @@ namespace Ollamani.Data
                 .ConnectionStrings["DefaultConnection"].ConnectionString;
         }
 
-        public void EjecutarSPNonQuery(string nombreSp, List<SqlParameter> parametros)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand(nombreSp, conn))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                if (parametros != null)
-                    cmd.Parameters.AddRange(parametros.ToArray());
-
-                conn.Open();
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-
         public DataTable EjecutarSP(string nombreSp, List<SqlParameter> parametros = null)
         {
             DataTable dt = new DataTable();

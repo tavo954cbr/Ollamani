@@ -11,5 +11,6 @@ namespace Ollamani.Models
         public string Nombre { get; set; }
         public string Grado { get; set; }
         public int Edad {  get; set; }
+        public bool Activo { get; set; }
     }
 }

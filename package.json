@@ -1,0 +1,23 @@
+{
+  "name": "ollamani",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tavo954cbr/Ollamani.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tavo954cbr/Ollamani/issues"
+  },
+  "homepage": "https://github.com/tavo954cbr/Ollamani#readme",
+  "description": "",
+  "dependencies": {
+    "devextreme-dist": "25.2.3"
+  }
+}

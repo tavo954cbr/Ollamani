@@ -32,7 +32,8 @@ namespace Ollamani.Controllers
                 IdAlumno = r.Field<int>("IdAlumno"),
                 Nombre = r.Field<string>("Nombre"),
                 Grado = r.Field<string>("Grado"),
-                Edad = r.Field<int>("Edad")
+                Edad = r.Field<int>("Edad"),
+                Activo = r.Field<bool>("Activo")
             }).ToList();
 
             return Json(alumnos, JsonRequestBehavior.AllowGet);
@@ -62,12 +63,25 @@ namespace Ollamani.Controllers
             }
             catch (Exception ex)
             {
-                // Esto te mostrará el error en la ventana de Output de Visual Studio
                 System.Diagnostics.Debug.WriteLine("ERROR AL ELIMINAR:");
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 System.Diagnostics.Debug.WriteLine(ex.StackTrace);
 
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult CambiarEstado(int id, bool activo)
+        {
+            try
+            {
+                _repo.CambiarEstadoAlumno(id, activo);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

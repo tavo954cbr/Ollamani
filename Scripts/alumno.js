@@ -1,36 +1,167 @@
 ﻿$(document).ready(function () {
-    cargarAlumnos();
+    cargarGrid();
 
-    $("#btnNuevo").click(function () {
-        abrirModalNuevo();
+    $("#btnNuevo").on("click", function () {
+        abrirFormulario();
     });
 });
 
-function cargarAlumnos() {
-    $.ajax({
-        url: '/Alumno/GetAlumnos',
-        type: 'GET',
-        success: function (data) {
-            let filas = '';
-            $.each(data, function (i, a) {
-                filas += `
-                    <tr>
-                        <td>${a.Nombre}</td>
-                        <td>${a.Grado}</td>
-                        <td>${a.Edad}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="verDetalles('${a.Nombre}', '${a.Grado}', ${a.Edad})">Ver</button>
-                            <button class="btn btn-warning btn-sm" onclick="editar(${a.IdAlumno}, '${a.Nombre}', '${a.Grado}', ${a.Edad})">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminar(${a.IdAlumno})">Eliminar</button>
-                        </td>
-                    </tr>`;
+function cargarGrid() {
+    // uso de dxDataGrid para el grid de visualización de datos
+    $("#gridContainer").dxDataGrid({
+        dataSource: "/Alumno/GetAlumnos",
+        keyExpr: "IdAlumno",
+        showBorders: true,
+        columns: [
+            {
+                dataField: "Nombre",
+                caption: "Nombre",
+                cellTemplate: function (container, options) {
+                    if (!options.data.Activo) {
+                        $("<span>")
+                            .text("Alumno inactivo")
+                            .css({
+                                color: "#999",
+                                fontStyle: "italic"
+                            })
+                            .appendTo(container);
+                    } else {
+                        $("<span>")
+                            .text(options.value)
+                            .appendTo(container);
+                    }
+                }
+            },
+            { dataField: "Grado", caption: "Grado" },
+            { dataField: "Edad", caption: "Edad", width: 80 },
+            {
+                type: "buttons",
+                width: 150,
+                buttons: [
+                    {
+                        hint: "Más Información",
+                        icon: "info",
+                        onClick: (e) => verMasInfo(e.row.data)
+                    },
+                    {
+                        hint: "Editar",
+                        icon: "edit",
+                        onClick: (e) => abrirFormulario(e.row.data)
+                    },
+                    {
+                        hint: "Eliminar",
+                        icon: "trash",
+                        onClick: (e) => eliminarRegistro(e.row.data.IdAlumno)
+                    }
+                ]
+            }
+        ],
+        paging: { pageSize: 10 },
+        searchPanel: { visible: true }
+    });
+}
+
+function abrirFormulario(data = null) {
+    const esEdicion = !!data;
+
+    Swal.fire({
+        title: esEdicion ? 'Editar Registro' : 'Nuevo Registro',
+        html: `
+            <div id="dxNombre" class="mb-2"></div>
+            <div id="dxGrado" class="mb-2"></div>
+            <div id="dxEdad" class="mb-2"></div>
+            <div id="dxActivo" class="mt-2" style="text-align: left;"></div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        didOpen: () => {
+            $("#dxNombre").dxTextBox({
+                placeholder: "Escriba el nombre...",
+                value: esEdicion ? data.Nombre : ""
             });
-            $("#tblAlumnos tbody").html(filas);
+            // uso de dxLookup para el combobox
+            $("#dxGrado").dxLookup({
+                dataSource: ["1º Grado", "2º Grado", "3º Grado", "4º Grado", "5º Grado", "6º Grado"],
+                placeholder: "Seleccione Grado",
+                value: esEdicion ? data.Grado : null
+            });
+            // uso de dxCheckBox para los checkbox
+            $("#dxActivo").dxCheckBox({
+                text: "Alumno activo",
+                value: esEdicion ? (data.Activo ?? true) : true,
+                iconSize: 20
+            });
+            // uso de dxNumberBox para el input numerico
+            $("#dxEdad").dxNumberBox({
+                placeholder: "Edad",
+                showSpinButtons: true,
+                value: esEdicion ? data.Edad : 18,
+                min: 1
+            });
         },
-        error: function (err) {
-            console.error('Error al cargar alumnos:', err);
-            Swal.fire('Error', 'No se pudieron cargar los alumnos', 'error');
+        preConfirm: () => {
+            return {
+                IdAlumno: esEdicion ? data.IdAlumno : 0,
+                Nombre: $("#dxNombre").dxTextBox("instance").option("value"),
+                Grado: $("#dxGrado").dxLookup("instance").option("value"),
+                Edad: $("#dxEdad").dxNumberBox("instance").option("value"),
+                Activo: $("#dxActivo").dxCheckBox("instance").option("value")
+            };
         }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const url = esEdicion ? "/Alumno/UpdateAlumnos" : "/Alumno/InsertAlumnos";
+            enviarDatos(url, result.value, function () {
+
+                if (
+                    esEdicion &&
+                    data.Activo !== result.value.Activo
+                ) {
+                    cambiarEstado(
+                        result.value.IdAlumno,
+                        result.value.Activo
+                    );
+                }
+            });
+        }
+    });
+}
+
+function enviarDatos(url, modelo, callback) {
+    $.post(url, modelo, function (res) {
+        if (res.success) {
+            Swal.fire("Éxito", "Operación realizada", "success");
+            $("#gridContainer").dxDataGrid("instance").refresh();
+            if (callback) callback();
+        }
+    });
+}
+
+function eliminarRegistro(id) {
+    Swal.fire({
+        title: '¿Eliminar alumno?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post("/Alumno/DeleteAlumnos", { id: id }, function (res) {
+                if (res.success) {
+                    Swal.fire("Eliminado", "El alumno ha sido borrado", "success");
+                    $("#gridContainer").dxDataGrid("instance").refresh();
+                }
+            });
+        }
+    });
+}
+
+function verMasInfo(data) {
+    Swal.fire({
+        title: 'Mas información',
+        icon: 'info',
+        html: `<b>Nombre:</b> ${data.Nombre} <br> <b>Grado:</b> ${data.Grado} <br> <b>Edad:</b> ${data.Edad}`
     });
 }
 
@@ -116,7 +247,7 @@ function editar(id, nombre, grado, edad) {
 
 
 function eliminar(id) {
-    console.log('ID a eliminar:', id); // Verifica que el ID sea válido
+    console.log('ID a eliminar:', id);
 
     Swal.fire({
         title: '¿Eliminar alumno?',
@@ -142,7 +273,6 @@ function eliminar(id) {
                     console.log('Response Text:', xhr.responseText);
                     console.log('Status Code:', xhr.status);
 
-                    // Intenta parsear el HTML del error
                     var errorHtml = xhr.responseText;
                     var tempDiv = document.createElement('div');
                     tempDiv.innerHTML = errorHtml;
@@ -172,4 +302,13 @@ function actualizarAlumno(model) {
     });
 }
 
+
+function cambiarEstado(id, activo) {
+    $.post("/Alumno/CambiarEstado", { id: id, activo: activo }, function (res) {
+        if (!res.success) {
+            Swal.fire("Error", "No se pudo cambiar el estado", "error");
+            $("#gridContainer").dxDataGrid("instance").refresh();
+        }
+    });
+}
 

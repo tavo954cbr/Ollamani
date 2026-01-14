@@ -23,7 +23,7 @@ namespace Ollamani.Data
 
         public void GuardarAlumno(AlumnoModel model)
         {
-            _db.EjecutarSPNonQuery(
+            _db.EjecutarSP(
                 "dbo.sp_Alumno_CRUD",
                 new List<SqlParameter>
                 {
@@ -36,7 +36,7 @@ namespace Ollamani.Data
 
         public void ActualizarAlumno(AlumnoModel model)
         {
-            _db.EjecutarSPNonQuery(
+            _db.EjecutarSP(
                 "dbo.sp_Alumno_CRUD",
                 new List<SqlParameter>
                 {
@@ -50,13 +50,26 @@ namespace Ollamani.Data
 
         public void EliminarAlumno(int idAlumno)
         {
-            _db.EjecutarSPNonQuery(
+            _db.EjecutarSP(
                 "dbo.sp_Alumno_CRUD",
                 new List<SqlParameter>
                 {
                     new SqlParameter("@Accion", "DELETE"),
                     new SqlParameter("@IdAlumno", idAlumno)
                 });
+        }
+
+        public void CambiarEstadoAlumno(int idAlumno, bool activo)
+        {
+            _db.EjecutarSP(
+                "dbo.sp_Alumno_CRUD",
+                new List<SqlParameter>
+                {
+                    new SqlParameter("@Accion", "ESTADO"),
+                    new SqlParameter("@IdAlumno", idAlumno),
+                    new SqlParameter("@Activo", activo)
+                }
+            );
         }
     }
 }

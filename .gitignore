@@ -9,6 +9,8 @@ obj/
 
 ## NuGet
 packages/
+## modulos de deveexpress,reinstalar
+node_modules/
 
 ## Configuración sensible
 Web.config
