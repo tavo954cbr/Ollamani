@@ -1,4 +1,4 @@
-# 🎓 Proyecto CRUD Alumnos - Ollamani (Examen Técnico)
+# 🎓 Proyecto CRUD Alumnos - Ollamani
 
 Este proyecto es una aplicación web desarrollada en .NET Framework. Implementa una solución CRUD (Create, Read, Update, Delete) utilizando una arquitectura de una sola página (SPA) mediante AJAX e integración de componentes de alta fidelidad.
 
